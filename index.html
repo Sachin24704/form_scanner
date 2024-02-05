@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image To Text</title>
+  </head>
+  <body>
+    <h1>Image Upload</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label for="image">Select an image:</label>
+      <input type="file" id="image" name="image" accept="image/*" required />
+      <br />
+      <button type="button" onclick="uploadImage()">Submit</button>
+    </form>
+
+    <!-- Placeholder to display the response from the backend -->
+    <div id="result"></div>
+
+    <script>
+      async function uploadImage() {
+        const formData = new FormData();
+        const fileInput = document.getElementById("image");
+
+        try {
+          if (fileInput.files.length > 0) {
+            formData.append("image", fileInput.files[0]);
+            const response = await fetch("http://localhost:3000/scan", {
+              method: "POST",
+              body: formData,
+            });
+            const data = await response.json();
+            console.log("backend data", data);
+            displayResponse(data);
+          } else {
+            console.error("Upload an image");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      // function displayResponse(data) {
+      //   // Assuming there is an element with id "result" to display the response
+      //   const resultElement = document.getElementById("result");
+
+      //   // Update the content of the result element with the response
+      //   resultElement.innerHTML = `<p>Text from image: ${data.text}</p>`;
+      // }
+      function displayResponse(result) {
+        const resultContainer = document.getElementById("result");
+        resultContainer.innerHTML = `
+                <p>Question Number: ${result.questionNumber}</p>
+                <p>Selected Options:</p>
+                <ul>
+                    ${result.selectedOptions
+                      .map(
+                        (option) => `<li>${option.option}: ${option.text}</li>`
+                      )
+                      .join("")}
+                </ul>
+            `;
+      }
+    </script>
+  </body>
+</html>
